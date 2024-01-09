@@ -1,0 +1,202 @@
+get_item_parts_original = d1sp_track_compatible_items.get_item_parts
+get_item_upgrades_original = d1sp_track_compatible_items.get_item_upgrades
+mark_untracked_original = d1sp_track_compatible_items.mark_untracked
+
+local track_parts = {}
+local track_upgr = {}
+order_table = {}
+
+--[[-------------------------------------------monkey patch оригинал----------------------------------]]
+
+function d1sp_track_compatible_items.get_item_parts(section_name)
+	result_for_parts = get_item_parts_original(section_name)
+	for _,sec in pairs(result_for_parts) do
+		-- printf(sec)
+		if track_parts[sec] then
+			track_parts[sec] = track_parts[sec] + 1
+		else
+			track_parts[sec] = 1
+		end
+	end
+	return result_for_parts
+end
+
+
+function d1sp_track_compatible_items.get_item_upgrades(section_name)
+	result_for_upgr = get_item_upgrades_original(section_name)
+	for _,sec in pairs(result_for_upgr) do
+		-- printf(sec)
+		if track_upgr[sec] then
+			track_upgr[sec] = track_upgr[sec] + 1
+		else
+			track_upgr[sec] = 1
+		end
+	end
+	return result_for_upgr
+end
+
+
+function d1sp_track_compatible_items.mark_untracked(section_name, type)
+	mark_untracked_original(section_name, type)
+	local list_to_release = nil
+	if type == "part" then 
+		local list_to_release = get_item_parts_original(section_name)
+		for _,sec in pairs(list_to_release) do
+			if track_parts[sec] and track_parts[sec] > 2 then
+				track_parts[sec] = track_parts[sec] - 2
+			elseif track_parts[sec] and track_parts[sec] <= 2 then
+				track_parts[sec] = nil
+			end
+		end
+	elseif type == "upgrade" then
+		local list_to_release = get_item_upgrades_original(section_name)
+		for _,sec in pairs(list_to_release) do
+			if track_upgr[sec] and track_upgr[sec] > 2 then
+				track_upgr[sec] = track_upgr[sec] - 2
+			elseif track_upgr[sec] and track_upgr[sec] <= 2 then
+				track_upgr[sec] = nil
+			end
+		end
+	end
+end
+
+
+--[[-------------------------------------------действия для диалогов----------------------------------]]
+
+
+function make_order_parts(npc)
+	local name = npc:character_name()
+	if not order_table[name] then order_table[name] = {} end
+	
+	local order_p = {}
+	order_p = dup_table(track_parts)
+	trader_autoinject.spawn_items(npc, order_p, true)
+	
+	order_table[name]["part"] = dup_table(order_p)
+	if not order_table[name]["bool"] then order_table[name]["bool"] = true end
+end
+
+
+function make_order_upgr(npc)
+	local name = npc:character_name()
+	if not order_table[name] then order_table[name] = {} end
+	
+	local order_u = {}
+	order_u = dup_table(track_upgr)
+	trader_autoinject.spawn_items(npc, order_u, true)
+	
+	order_table[name]["upgr"] = dup_table(order_u)
+	if not order_table[name]["bool"] then order_table[name]["bool"] = true end
+end
+
+
+function return_supplies(actor, npc)
+	if not npc then return end
+	local name = npc:character_name()
+	
+	local function remove_order(_,item)	
+		if order_table[name]["part"] then
+			for _,sec in pairs(order_table[name]["part"]) do
+				if item:section() == sec then
+					alife_release(item)
+				end
+			end
+		end
+		if order_table[name]["upgr"] then
+			for _,sec in pairs(order_table[name]["upgr"]) do
+				if item:section() == sec then
+					alife_release(item)
+				end
+			end
+		end
+	end	
+	
+	npc:iterate_inventory(remove_order,npc)
+	order_table[name] = nil
+	trade_manager.update(npc, true)
+end
+
+
+function pay_for_order1(npc, actor)
+	actor:transfer_money(1000, npc)
+	news_manager.relocate_money(actor, "out", 1000)
+end
+
+
+function pay_for_order2(npc, actor)
+	actor:transfer_money(10000, npc)
+	news_manager.relocate_money(actor, "out", 10000)
+end
+
+
+function pay_for_order3(npc, actor)
+	actor:transfer_money(9000, npc)
+	news_manager.relocate_money(actor, "out", 9000)
+end
+
+
+--[[-------------------------------------------условия для диалогов----------------------------------]]
+
+function requirement_for_upgr(actor, npc)
+	if not npc then return end
+
+	local supply_level = trader_autoinject.supply_level(npc, true) or 1	
+	if (supply_level >= 4) then return true end
+	return false
+end
+
+
+function check_bool(actor, npc)
+	local name = npc:character_name()
+	if order_table[name] and order_table[name]["bool"] then return true end
+	return false
+end
+
+
+function check_not_bool(actor, npc)
+	local name = npc:character_name()
+	if not order_table[name] then return true end
+	return false
+end
+
+
+function has_money_for_order1(actor, npc)
+	return db.actor:money() >= 1000
+end
+
+
+function has_money_for_order2(actor, npc)
+	return db.actor:money() >= 10000
+end
+
+
+function has_money_for_order3(actor, npc)
+	return db.actor:money() >= 9000
+end
+
+
+function check_mas(mas)
+	local i = 0
+	for _,sec in pairs(mas) do
+		i = i + 1
+	end
+	if i ~= 0 then return true end
+	return false
+end
+
+function check_parts(actor, npc)
+	if check_mas(track_parts) then return true end
+	return false
+end
+
+
+function check_upgr(actor, npc)
+	if check_mas(track_upgr) then return true end
+	return false
+end
+
+
+function check_parts_and_upgr(actor, npc)
+	if check_mas(track_parts) and check_mas(track_upgr) then return true end
+	return false
+end

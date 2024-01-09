@@ -1,0 +1,47 @@
+dialogs_table = {
+	["mar_base_stalker_tech"] = "dm_tech_order",
+	["agr_smart_terrain_1_6_army_mechanic_stalker"] 	 = "dm_tech_order",
+	["bar_visitors_stalker_mechanic"] 					 = "dm_tech_order",
+	["dasc_tech_mlr"] 									 = "dm_tech_order",
+	["val_smart_terrain_7_3_bandit_mechanic_stalker"] 	 = "dm_tech_order",
+	["cit_killers_merc_mechanic_stalker"]				 = "dm_tech_order",
+	["esc_smart_terrain_5_7_loner_mechanic_stalker"]	 = "dm_tech_order",
+	["army_south_mechan_mlr"]							 = "dm_tech_order",
+	["sim_default_army_mechanic"] 						 = "dm_tech_order",
+	["sim_default_bandit_mechanic"]						 = "dm_tech_order",
+	["sim_default_csky_mechanic"]						 = "dm_tech_order",
+	["sim_default_dolg_mechanic"]						 = "dm_tech_order",
+	["sim_default_ecolog_mechanic"]						 = "dm_tech_order",
+	["sim_default_freedom_mechanic"]					 = "dm_tech_order",
+	["sim_default_greh_mechanic"]						 = "dm_tech_order",
+	["sim_default_isg_mechanic"]						 = "dm_tech_order",
+	["sim_default_killer_mechanic"]						 = "dm_tech_order",
+	["sim_default_monolith_mechanic"]					 = "dm_tech_order",
+	["sim_default_renegade_mechanic"]					 = "dm_tech_order",
+	["sim_default_stalker_mechanic"]					 = "dm_tech_order",
+	["jup_b19_freedom_yar"]								 = "dm_tech_order",
+	["jup_b217_stalker_tech"]							 = "dm_tech_order",
+	["jup_b6_scientist_tech"]							 = "dm_tech_order",
+	["jup_cont_mech_bandit"]							 = "dm_tech_order",
+	["mechanic_monolith_jup_depo"]						 = "dm_tech_order",
+	["mil_smart_terrain_7_7_freedom_mechanic_stalker"]	 = "dm_tech_order",
+	["pri_monolith_monolith_mechanic_stalker"]			 = "dm_tech_order",
+	["pri_a16_mech_mlr"]								 = "dm_tech_order",
+	["mechanic_monolith_kbo"]							 = "dm_tech_order",
+	["merc_pri_a18_mech_mlr"]							 = "dm_tech_order",
+	["red_forester_tech"]								 = "dm_tech_order",
+	["trucks_cemetery_bandit_mechanic"]					 = "dm_tech_order",
+	["mechanic_army_yan_mlr"]							 = "dm_tech_order",
+	["zat_stancia_mech_merc"]							 = "dm_tech_order",
+	["zat_tech_mlr"]									 = "dm_tech_order",
+	["zat_a2_stalker_mechanic"]							 = "dm_tech_order",
+}
+
+function on_game_start()
+	RegisterScriptCallback("on_specific_character_dialog_list", function(character_id, dialog_list)
+		if dialogs_table[character_id] then
+			local res = dialog_list:add(dialogs_table[character_id])
+			local ret = dialog_list:add("dm_tech_order_done")
+		end
+	end)
+end

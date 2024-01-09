@@ -39,3 +39,8 @@ luac.out
 *.x86_64
 *.hex
 
+custom_functor_autoinject.script
+d1sp_track_compatible_items_mcm.script
+d1sp_track_compatible_items.script
+trader_autoinject.script
+weight.script

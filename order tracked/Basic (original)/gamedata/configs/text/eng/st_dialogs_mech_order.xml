@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<string_table>
+
+	<string id="order_by_mech_dialogue_1_0">
+        <text>I want to order something.</text>
+    </string>
+  
+	<string id="order_by_mech_dialogue_1_1">
+        <text>...</text>
+    </string>
+	
+	<string id="order_by_mech_dialogue_1_2">
+        <text>Spare parts. Here is the list. %c[d_orange][1000]</text>
+    </string>  
+	
+	<string id="order_by_mech_dialogue_1_3">
+        <text>Upgrade kits. Here is the list. %c[d_orange][10000]</text>
+    </string>  
+	
+	<string id="order_by_mech_dialogue_1_4">
+        <text>The order is completed.</text>
+    </string>  
+	
+	<string id="order_by_mech_dialogue_1_7">
+        <text>I've changed my mind.</text>
+    </string>  
+	
+	<string id="order_by_mech_dialogue_1_8">
+        <text>Spare parts and upgrade kits. Here is the list. %c[d_orange][9000]</text>
+    </string>  
+	
+	<string id="order_by_mech_dialogue_1_6">
+        <text>I want to order something else.</text>
+    </string>  
+	
+</string_table>
+

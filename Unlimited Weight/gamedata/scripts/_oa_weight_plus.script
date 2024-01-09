@@ -1,0 +1,8 @@
+function on_game_start()
+    RegisterScriptCallback("actor_on_update", add_weight_of_inventory)
+end
+
+function add_weight_of_inventory()
+	weight.add_weight("weight_plus", db.actor:get_total_weight(), true)
+end
+

@@ -1,0 +1,35 @@
+function on_game_start()
+	RegisterScriptCallback("actor_on_weapon_reload", oa_add_ammo)
+	RegisterScriptCallback("actor_on_weapon_jammed", oa_add_ammo)
+	RegisterScriptCallback("actor_on_weapon_no_ammo", oa_add_ammo)
+end
+
+function oa_add_ammo()
+		
+	local function itr(_,obj)
+		if obj:is_ammo() then
+			alife_release(obj)
+		end
+	end
+	db.actor:iterate_inventory(itr,db.actor)	
+	
+	local string_find = string.find
+	local wpn = db.actor:active_item()
+	
+	if not(wpn) then 
+		return
+	end
+	
+	local ammo = utils_item.get_ammo(wpn:section(), wpn:id(), true)
+	
+	for sec,_ in pairs(ammo) do
+		if not(string_find(sec,"_verybad") or string_find(sec,"_bad")) then
+			local ammo_in_box = IsItem("ammo", sec)
+			if ammo_in_box then
+				give_object_to_actor(sec, 100 / ammo_in_box + 1)
+			else
+				give_object_to_actor(sec, 1)
+			end
+		end		
+	end
+end

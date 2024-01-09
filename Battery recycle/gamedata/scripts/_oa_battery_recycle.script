@@ -1,0 +1,49 @@
+local add_functor = custom_functor_autoinject.add_functor
+
+function oa_battery_recycle()
+
+	local battery_func = {
+		check = function(obj, bag, mode)
+			return obj:section()=="batteries_dead"
+		end,
+		str = function(obj, bag, mode)
+			return "st_oa_recycle_batteries"
+		end,
+		func = function(obj, bag, mode)
+			local total_power = 0
+			local function itr(_,obj)
+				if obj:section()=="batteries_dead" then		
+					local cond = obj:condition()			
+					total_power = total_power + cond
+				end
+			end
+			db.actor:iterate_inventory(itr,nil)	
+			
+			--[[
+			--for debuging
+			printf("total power is [%s]", total_power)
+			printf("integer power is [%s]", total_power - total_power % 1)
+			printf("decimal power is [%s]", total_power % 1)
+			]]
+			
+			local function battery_recycle(_,obj)
+				if obj:section()=="batteries_dead" and total_power and total_power >= 1 then
+					obj:set_condition(1)
+					total_power = total_power -1
+				elseif obj:section()=="batteries_dead" and total_power and total_power < 1 and 0 < total_power then
+					obj:set_condition(total_power)
+					total_power = nil
+				elseif obj:section()=="batteries_dead" then
+					alife_release(obj)
+				end
+			end
+			db.actor:iterate_inventory(battery_recycle,nil)	
+		end
+	}
+	add_functor("oa_recycle_batteries", battery_func.check, battery_func.str, nil, battery_func.func, true)
+end
+
+
+function on_game_start()
+	oa_battery_recycle()
+end
