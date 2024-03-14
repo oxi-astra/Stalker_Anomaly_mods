@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<w>
+	<marker x="0" y="0" width="10" height="10" stretch="5" alignment="c" location_level="5">
+	    <texture>ui_frame_error_sign_red</texture>
+	    <border x="0" y="0" width="0" height="0" stretch="0" light_anim="ui_slow_blinking_alpha" la_cyclic="1" la_texture="1" la_text="0" la_alpha="255">
+	    </border>
+	</marker>
+
+	<!-- alive -->
+	<stalker  x="0" y="0" width="9" height="12" alignment="c" scale="1" scale_min="1" scale_max="1" stretch="5" location_level="5">
+		<texture>ui_mm_faction_stalker</texture>
+	</stalker>		
+	
+	<bandit  x="0" y="0" width="9" height="12" alignment="c" scale="1" scale_min="1" scale_max="1" stretch="5" location_level="5">
+		<texture>ui_mm_faction_bandit</texture>
+	</bandit>
+	
+	<csky  x="0" y="0" width="9" height="12" alignment="c" scale="1" scale_min="1" scale_max="1" stretch="5" location_level="5">
+		<texture>ui_mm_faction_csky</texture>
+	</csky>		
+	
+	<army x="0" y="0" width="9" height="12" alignment="c" scale="1" scale_min="1" scale_max="1" stretch="5" location_level="5">
+		<texture>ui_mm_faction_army</texture>
+	</army>		
+	
+	<freedom  x="0" y="0" width="9" height="12" alignment="c" scale="1" scale_min="1" scale_max="1" stretch="5" location_level="5">
+		<texture>ui_mm_faction_freedom</texture>
+	</freedom>		
+	
+	<dolg  x="0" y="0" width="9" height="12" alignment="c" scale="1" scale_min="1" scale_max="1" stretch="5" location_level="5">
+		<texture>ui_mm_faction_dolg</texture>
+	</dolg>		
+	
+	<ecolog  x="0" y="0" width="9" height="12" alignment="c" scale="1" scale_min="1" scale_max="1" stretch="5" location_level="5">
+		<texture>ui_mm_faction_ecolog</texture>
+	</ecolog>		
+	
+	<killer  x="0" y="0" width="9" height="12" alignment="c" scale="1" scale_min="1" scale_max="1" stretch="5" location_level="5">
+		<texture>ui_mm_faction_killer</texture>
+	</killer>		
+	
+	<monolith  x="0" y="0" width="9" height="12" alignment="c" scale="1" scale_min="1" scale_max="1" stretch="5" location_level="5">
+		<texture>ui_mm_faction_monolith</texture>
+	</monolith>
+
+	<greh  x="0" y="0" width="9" height="12" alignment="c" scale="1" scale_min="1" scale_max="1" stretch="5" location_level="5">
+		<texture>ui_mm_faction_greh</texture>
+	</greh>	
+	
+	<renegade  x="0" y="0" width="9" height="12" alignment="c" scale="1" scale_min="1" scale_max="1" stretch="5" location_level="5">
+		<texture>ui_mm_faction_renegade</texture>
+	</renegade>	
+	
+	<isg  x="0" y="0" width="9" height="12" alignment="c" scale="1" scale_min="1" scale_max="1" stretch="5" location_level="5">
+		<texture>ui_mm_faction_isg</texture>
+	</isg>
+	
+	<zombied  x="0" y="0" width="9" height="12" alignment="c" scale="1" scale_min="1" scale_max="1" stretch="5" location_level="5">
+		<texture>ui_mm_faction_stalker_inactive</texture>
+	</zombied>	
+	
+</w>

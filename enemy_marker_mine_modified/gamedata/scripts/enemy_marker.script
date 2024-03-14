@@ -1,0 +1,141 @@
+local UF_MARKER_LOOT_RANGE	= 100 * 100
+local marker_loot_storage = {}
+
+function marker_loot_actor_on_update()
+	local t = db.storage
+	for id,st in pairs(t) do
+		if (st and st.object and marker_loot_validate_npc(st.object)) then
+			if (marker_loot_storage[id] ~= true) then
+				marker_loot_storage[id] = true
+			end
+		end
+	end
+	
+	marker_loot_active()
+end
+
+function marker_loot_validate_npc(npc)
+    if not IsStalker(npc) then
+        return false
+    end
+	
+	if not (npc:alive() and db.actor:alive()) then
+		return false
+	end
+	
+    if npc:relation(db.actor) < game_object.enemy then
+        return false
+    end
+
+	if not (db.actor:see(npc) or npc:see(db.actor)) then
+		return false
+	end
+	
+	if npc:position():distance_to_sqr(db.actor:position()) > UF_MARKER_LOOT_RANGE then
+		return false
+	end
+	
+	return true
+end
+
+HUD_ML = nil
+
+function marker_loot_active()
+	if (HUD_ML == nil) then
+		HUD_ML = ui_marker_enemy()
+		get_hud():AddDialogToRender(HUD_ML)
+	end
+end
+
+function marker_loot_remove()
+	if (HUD_ML ~= nil) then
+		get_hud():RemoveDialogToRender(HUD_ML)
+		HUD_ML = nil
+	end
+end
+
+function marker_loot_update()
+	if (HUD_ML ~= nil) then
+		HUD_ML:Update(true)
+	end
+end
+
+class "ui_marker_enemy" (CUIScriptWnd)
+
+function ui_marker_enemy:__init() super()
+	self:InitControls()
+end
+
+function ui_marker_enemy:__finalize()
+end
+
+function ui_marker_enemy:InitControls()
+
+	self:SetAutoDelete(true)
+	self.xml = CScriptXmlInit()
+	self.xml:ParseFile("ui_mark_patches.xml")
+	
+	self.ele = {}
+end
+
+function ui_marker_enemy:Update()
+	CUIScriptWnd.Update(self)
+	
+	for id,_ in pairs(marker_loot_storage) do
+		local st = db.storage[id]
+		if (st and st.object and marker_loot_validate_npc(st.object)) then
+			if (self.ele[id] == nil) then
+				self.ele[id] = {}
+				self.ele[id].marker = self.xml:InitStatic(st.object:character_community(), self)
+				self.ele[id].border = self.xml:InitStatic("marker:border",self.ele[id].marker)
+			end
+			
+			local vec = self:GetScreenCoordinates(st.object)
+			if (vec) then
+				self.ele[id].marker:SetWndPos(vec)
+				self.ele[id].marker:Show(true)
+			else
+				self.ele[id].marker:Show(false)
+			end
+		else
+			marker_loot_storage[id] = nil
+		end
+	end
+	
+	for id,_ in pairs(self.ele) do
+		if (marker_loot_storage[id] ~= true) then
+			self.ele[id].marker:Show(false)
+			self.ele[id] = nil
+		end
+	end
+end
+
+function ui_marker_enemy:GetScreenCoordinates(obj)
+	local pos = utils_obj.safe_bone_pos(obj,"bip01_spine")
+	local vec = pos and game.world2ui(vector():set(pos.x,pos.y + 1,pos.z),false)
+	if (vec and (vec.x ~= -9999) and (vec.y ~= 0)) then
+		return vec
+	end
+	return nil
+end
+
+function actor_on_first_update()
+	marker_loot_active()
+end
+
+function actor_on_net_destroy()
+	marker_loot_remove()
+end
+
+function update_hud_on_show_hide()
+	marker_loot_update()
+end
+
+
+function on_game_start()
+	RegisterScriptCallback("actor_on_first_update",actor_on_first_update)
+	RegisterScriptCallback("actor_on_net_destroy",actor_on_net_destroy)
+	RegisterScriptCallback("GUI_on_show",update_hud_on_show_hide)
+	RegisterScriptCallback("GUI_on_hide",update_hud_on_show_hide)
+	RegisterScriptCallback("actor_on_update",marker_loot_actor_on_update)
+end
