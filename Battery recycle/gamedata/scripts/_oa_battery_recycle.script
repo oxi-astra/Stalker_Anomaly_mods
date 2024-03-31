@@ -4,36 +4,37 @@ function oa_battery_recycle()
 
 	local battery_func = {
 		check = function(obj, bag, mode)
-			return obj:section()=="batteries_dead"
+			return obj:section()=="batteries_dead" or obj:section()=="batteries_exo"
 		end,
 		str = function(obj, bag, mode)
 			return "st_oa_recycle_batteries"
 		end,
 		func = function(obj, bag, mode)
 			local total_power = 0
+			local target = ""
+			
+			if obj:section()=="batteries_dead" then 
+				target = "batteries_dead"
+			elseif obj:section()=="batteries_exo" then 
+				target = "batteries_exo"
+			end
+			
 			local function itr(_,obj)
-				if obj:section()=="batteries_dead" then		
+				if obj:section()==target then		
 					local cond = obj:condition()			
 					total_power = total_power + cond
 				end
 			end
 			db.actor:iterate_inventory(itr,nil)	
 			
-			--[[
-			--for debuging
-			printf("total power is [%s]", total_power)
-			printf("integer power is [%s]", total_power - total_power % 1)
-			printf("decimal power is [%s]", total_power % 1)
-			]]
-			
 			local function battery_recycle(_,obj)
-				if obj:section()=="batteries_dead" and total_power and total_power >= 1 then
+				if obj:section()==target and total_power and total_power >= 1 then
 					obj:set_condition(1)
 					total_power = total_power -1
-				elseif obj:section()=="batteries_dead" and total_power and total_power < 1 and 0 < total_power then
+				elseif obj:section()==target and total_power and total_power < 1 and 0 < total_power then
 					obj:set_condition(total_power)
 					total_power = nil
-				elseif obj:section()=="batteries_dead" then
+				elseif obj:section()==target then
 					alife_release(obj)
 				end
 			end
