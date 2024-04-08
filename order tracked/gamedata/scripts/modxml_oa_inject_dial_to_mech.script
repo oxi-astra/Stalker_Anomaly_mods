@@ -1,5 +1,5 @@
 dialogs_table = {
-	["mar_base_stalker_tech"] = "dm_tech_order",
+	["mar_base_stalker_tech"] 							 = "dm_tech_order",
 	["agr_smart_terrain_1_6_army_mechanic_stalker"] 	 = "dm_tech_order",
 	["bar_visitors_stalker_mechanic"] 					 = "dm_tech_order",
 	["dasc_tech_mlr"] 									 = "dm_tech_order",
