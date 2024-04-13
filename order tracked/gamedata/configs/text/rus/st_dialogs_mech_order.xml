@@ -18,7 +18,7 @@
     </string>  
 	
 	<string id="order_by_mech_dialogue_1_4">
-        <text>Заказ выполнен.</text>
+        <text>Заказ сделан. Я свяжусь с тобой, когда он придёт.</text>
     </string>  
 	
 	<string id="order_by_mech_dialogue_1_7">
@@ -29,9 +29,9 @@
         <text>Запчасти и наборы улучшений. Вот список. %c[d_orange][9000]</text>
     </string>  
 	
-	<string id="order_by_mech_dialogue_1_6">
-        <text>Я хочу заказать что-нибудь другое.</text>
-    </string>  
+	<string id="oa_msg_order_ready">
+		<text>Сталкер, заказ готов.</text>
+	</string>
 	
 </string_table>
 

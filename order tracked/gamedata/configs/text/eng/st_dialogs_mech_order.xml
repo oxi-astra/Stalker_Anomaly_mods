@@ -18,7 +18,7 @@
     </string>  
 	
 	<string id="order_by_mech_dialogue_1_4">
-        <text>The order is completed.</text>
+        <text>The order is done. I'll contact you when he arrives.</text>
     </string>  
 	
 	<string id="order_by_mech_dialogue_1_7">
@@ -29,9 +29,9 @@
         <text>Spare parts and upgrade kits. Here is the list. %c[d_orange][9000]</text>
     </string>  
 	
-	<string id="order_by_mech_dialogue_1_6">
-        <text>I want to order something else.</text>
-    </string>  
+	<string id="oa_msg_order_ready">
+		<text>Stalker, the order is ready.</text>
+	</string>
 	
 </string_table>
 

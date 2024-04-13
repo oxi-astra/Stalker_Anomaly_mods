@@ -16,7 +16,7 @@ order_table = {}
 
 local debug = false
 
-local function print_list(tbl)
+function print_list(tbl)
 	for sec,count in pairs(tbl) do
 		printf("sec is %s", sec)
 		if type(count) == "table" then
@@ -28,7 +28,7 @@ local function print_list(tbl)
 	end
 end
 
-function on_game_start() 
+function on_game_start()
 	if debug then
 		RegisterScriptCallback("on_key_press", on_key_press)
 	end
@@ -44,6 +44,7 @@ function on_key_press(key)
 		print_list(order_table)
 	end 
 end
+
 
 --[[------------------------------from itms_manager.script---------------------------------------------------]]
 
@@ -194,53 +195,57 @@ end
 function make_order_parts(npc)
 	local name = npc:character_name()
 	if not order_table[name] then order_table[name] = {} end
-	
-	local order_p = {}
-	order_p = dup_table(track_parts)
-	trader_autoinject.spawn_items(npc, order_p, true)
-	
-	order_table[name]["part"] = dup_table(order_p)
+
+	order_table[name]["part"] = dup_table(track_parts)
 	if not order_table[name]["bool"] then order_table[name]["bool"] = true end
+	
+	CreateTimeEvent(npc:id(), name, 10, order_ready, npc, "part")
 end
 
 
 function make_order_upgr(npc)
 	local name = npc:character_name()
 	if not order_table[name] then order_table[name] = {} end
-	
-	local order_u = {}
-	order_u = dup_table(track_upgr)
-	trader_autoinject.spawn_items(npc, order_u, true)
-	
-	order_table[name]["upgr"] = dup_table(order_u)
+
+	order_table[name]["upgr"] = dup_table(track_upgr)
 	if not order_table[name]["bool"] then order_table[name]["bool"] = true end
+	
+	CreateTimeEvent(npc:id(), name, 10, order_ready, npc, "upgr")
 end
 
 
-function return_supplies(actor, npc)
-	if not npc then return end
+function make_order_part_and_upgr(npc)
 	local name = npc:character_name()
+	if not order_table[name] then order_table[name] = {} end
+
+	order_table[name]["part"] = dup_table(track_parts)
+	order_table[name]["upgr"] = dup_table(track_upgr)
+	if not order_table[name]["bool"] then order_table[name]["bool"] = true end
 	
-	local function remove_order(_,item)	
-		if order_table[name]["part"] then
-			for _,sec in pairs(order_table[name]["part"]) do
-				if item:section() == sec then
-					alife_release(item)
-				end
-			end
-		end
-		if order_table[name]["upgr"] then
-			for _,sec in pairs(order_table[name]["upgr"]) do
-				if item:section() == sec then
-					alife_release(item)
-				end
-			end
-		end
-	end	
+	CreateTimeEvent(npc:id(), name, 10, order_ready, npc, "part_and_upgr")
+end
+
+
+function order_ready(npc, string)
+	name = npc:character_name()
+	RemoveTimeEvent(npc:id(), name)
 	
-	npc:iterate_inventory(remove_order,npc)
+	local msg = game.translate_string("oa_msg_order_ready")
+	local comm = dynamic_news_helper.GetCommunityDescription(npc,6)
+	local se = strformat("%s, %s",name,comm)
+	dynamic_news_helper.send_tip(msg, se, 5, 10, npc:character_icon(), nil, "npc")
+
+
+	if string == "part" then
+		trader_autoinject.spawn_items(npc, order_table[name]["part"], true)
+	elseif string == "upgr" then
+		trader_autoinject.spawn_items(npc, order_table[name]["upgr"], true)
+	elseif string == "part_and_upgr" then
+		trader_autoinject.spawn_items(npc, order_table[name]["part"], true)
+		trader_autoinject.spawn_items(npc, order_table[name]["upgr"], true)
+	end
+	
 	order_table[name] = nil
-	trade_manager.update(npc, true)
 end
 
 
@@ -264,18 +269,12 @@ end
 
 --[[-------------------------------------------условия для диалогов----------------------------------]]
 
+
 function requirement_for_upgr(actor, npc)
 	if not npc then return end
 
 	local supply_level = trader_autoinject.supply_level(npc, true) or 1	
 	if (supply_level >= 4) then return true end
-	return false
-end
-
-
-function check_bool(actor, npc)
-	local name = npc:character_name()
-	if order_table[name] and order_table[name]["bool"] then return true end
 	return false
 end
 
@@ -312,21 +311,18 @@ function check_mas(mas)
 end
 
 function check_parts(actor, npc)
-	local name = npc:character_name()
 	if check_mas(track_parts) then return true end
 	return false
 end
 
 
 function check_upgr(actor, npc)
-	local name = npc:character_name()
 	if check_mas(track_upgr) then return true end
 	return false
 end
 
 
 function check_parts_and_upgr(actor, npc)
-	local name = npc:character_name()
 	if check_mas(track_parts) and check_mas(track_upgr) then return true end
 	return false
 end

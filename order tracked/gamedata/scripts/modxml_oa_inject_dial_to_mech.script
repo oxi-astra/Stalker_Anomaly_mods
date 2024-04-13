@@ -41,7 +41,7 @@ function on_game_start()
 	RegisterScriptCallback("on_specific_character_dialog_list", function(character_id, dialog_list)
 		if dialogs_table[character_id] then
 			local res = dialog_list:add(dialogs_table[character_id])
-			local ret = dialog_list:add("dm_tech_order_done")
+			-- local ret = dialog_list:add("dm_tech_order_done")
 		end
 	end)
 end
