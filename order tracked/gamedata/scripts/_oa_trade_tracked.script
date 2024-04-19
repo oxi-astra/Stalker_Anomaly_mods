@@ -9,12 +9,11 @@ mark_untracked_original = original.mark_untracked
 
 local track_parts = {}
 local track_upgr = {}
-order_table = {}
-
+local order_table = {}
 
 --[[------------------------------------debugging------------------------------------------------------------]]
 
-local debug = false
+local debug = true
 
 function print_list(tbl)
 	for sec,count in pairs(tbl) do
@@ -25,12 +24,6 @@ function print_list(tbl)
 		else
 			printf("count is %s", count)
 		end
-	end
-end
-
-function on_game_start()
-	if debug then
-		RegisterScriptCallback("on_key_press", on_key_press)
 	end
 end
 
@@ -45,6 +38,19 @@ function on_key_press(key)
 	end 
 end
 
+local function print_dbg(msg)
+	if debug then
+		printf(string.format("- [_oa_trade_tracked.script] | ") .. msg)
+	end
+end
+
+--[[
+function on_game_start()
+	if debug then
+		RegisterScriptCallback("on_key_press", on_key_press)
+	end
+end
+]]
 
 --[[------------------------------from itms_manager.script---------------------------------------------------]]
 
@@ -68,9 +74,7 @@ local upg_ind = {
 }
 
 local function extract_upgr_tools_local(t1, current_grp)
-
 	local elements = parse_list(ini_sys, current_grp, "elements")
-	
 	-- Gather groups and indexes
 	for i=1,#elements do -- search in upgrade group elements
 		for k,v in pairs(upg_gr) do
@@ -188,18 +192,77 @@ function original.mark_untracked(section_name, type)
 	end
 end
 
+--[[----------------------------------------------вспомогательные-------------------------------------]]
+
+function length_of_list(list)
+	if not list then return end
+	local i = 0
+	for a, b in pairs(list) do
+		i = i + 1
+	end
+	return i
+end
+
+function make_order(name, npc)
+	local t = game.get_game_time()
+	local e = game.CTime()
+	local Y, M, D, h, m, s, ms = 0, 0, 0, 0, 0, 0, 0
+	Y, M, D, h, m, s, ms = t:get( Y, M, D, h, m, s, ms )
+	e:set( Y, M, D, h, m + 3, s, ms )
+	
+	-- length_of_list() -- внедрение зависимости времени и денег от количества
+	
+	order_table[name].from_time = t
+	order_table[name].to_time = e -- сюда время на доставку
+	order_table[name].level = level.name()
+	order_table[name].id = npc:id()
+	
+	order_table[name].comm = dynamic_news_helper.GetCommunityDescription(npc,6)
+	order_table[name].icon = npc:character_icon()
+	order_table[name].msg_snd = false
+end
+
+
+function order_ready(name)
+	local level_name = level.name()
+	local msg = game.translate_string("oa_msg_order_ready")
+	local comm = order_table[name].comm
+	local icon = order_table[name].icon
+	local se = strformat("%s, %s",name, comm)
+	dynamic_news_helper.send_tip(msg, se, 5, 10, icon, nil, "npc")
+
+	order_table[name].msg_snd = true
+	print_dbg("message delivered")
+end
+
+
+function data_inject(name)
+	local npc = level.object_by_id(order_table[name].id)
+
+	if not(order_table) or (order_table == {}) or (type(npc.name) ~= "function") then
+		print_dbg("miss injection")
+		return 
+	end
+	
+	print_dbg("start injection")
+	if order_table[name]["part"] then
+		trader_autoinject.spawn_items(npc, order_table[name]["part"], true)
+	end
+	if order_table[name]["upgr"] then
+		trader_autoinject.spawn_items(npc, order_table[name]["upgr"], true)
+	end
+	order_table[name] = nil
+	print_dbg("end injection")
+end
 
 --[[-------------------------------------------действия для диалогов----------------------------------]]
-
 
 function make_order_parts(npc)
 	local name = npc:character_name()
 	if not order_table[name] then order_table[name] = {} end
 
 	order_table[name]["part"] = dup_table(track_parts)
-	if not order_table[name]["bool"] then order_table[name]["bool"] = true end
-	
-	CreateTimeEvent(npc:id(), name, 10, order_ready, npc, "part")
+	make_order(name, npc)
 end
 
 
@@ -208,9 +271,7 @@ function make_order_upgr(npc)
 	if not order_table[name] then order_table[name] = {} end
 
 	order_table[name]["upgr"] = dup_table(track_upgr)
-	if not order_table[name]["bool"] then order_table[name]["bool"] = true end
-	
-	CreateTimeEvent(npc:id(), name, 10, order_ready, npc, "upgr")
+	make_order(name, npc)
 end
 
 
@@ -220,55 +281,77 @@ function make_order_part_and_upgr(npc)
 
 	order_table[name]["part"] = dup_table(track_parts)
 	order_table[name]["upgr"] = dup_table(track_upgr)
-	if not order_table[name]["bool"] then order_table[name]["bool"] = true end
-	
-	CreateTimeEvent(npc:id(), name, 10, order_ready, npc, "part_and_upgr")
-end
-
-
-function order_ready(npc, string)
-	name = npc:character_name()
-	RemoveTimeEvent(npc:id(), name)
-	
-	local msg = game.translate_string("oa_msg_order_ready")
-	local comm = dynamic_news_helper.GetCommunityDescription(npc,6)
-	local se = strformat("%s, %s",name,comm)
-	dynamic_news_helper.send_tip(msg, se, 5, 10, npc:character_icon(), nil, "npc")
-
-
-	if string == "part" then
-		trader_autoinject.spawn_items(npc, order_table[name]["part"], true)
-	elseif string == "upgr" then
-		trader_autoinject.spawn_items(npc, order_table[name]["upgr"], true)
-	elseif string == "part_and_upgr" then
-		trader_autoinject.spawn_items(npc, order_table[name]["part"], true)
-		trader_autoinject.spawn_items(npc, order_table[name]["upgr"], true)
-	end
-	
-	order_table[name] = nil
+	make_order(name, npc)
 end
 
 
 function pay_for_order1(npc, actor)
-	actor:transfer_money(1000, npc)
-	news_manager.relocate_money(actor, "out", 1000)
+
+	local price = 1000
+	
+	actor:transfer_money(price, npc)
+	news_manager.relocate_money(actor, "out", price)
 end
 
 
 function pay_for_order2(npc, actor)
-	actor:transfer_money(10000, npc)
-	news_manager.relocate_money(actor, "out", 10000)
+
+	local price = 2000
+
+	actor:transfer_money(price, npc)
+	news_manager.relocate_money(actor, "out", price)
 end
 
 
 function pay_for_order3(npc, actor)
-	actor:transfer_money(9000, npc)
-	news_manager.relocate_money(actor, "out", 9000)
+
+	local price = 3000
+	
+	actor:transfer_money(price, npc)
+	news_manager.relocate_money(actor, "out", price)
+end
+
+--[[----------------------------------------------time_management------------------------------------]]
+
+function on_game_start()
+	RegisterScriptCallback("save_state", save_state)
+	RegisterScriptCallback("load_state", load_state)
+	RegisterScriptCallback("actor_on_update", time_management)
 end
 
 
---[[-------------------------------------------условия для диалогов----------------------------------]]
+function time_management()	
+	if length_of_list(order_table) and length_of_list(order_table) > 0 then
+		local level_name = level.name()
+		local time_now = game.get_game_time()
+		
+		for name, _ in pairs(order_table) do
+			if order_table[name].msg_snd == false and time_now:diffSec(order_table[name].from_time) > 180 then
+				print_dbg("time for message")
+				order_ready(name)
+			end
+			
+			if order_table[name].msg_snd == true and order_table[name].level == level_name then
+				print_dbg("injected")
+				data_inject(name)
+			end
+		end
+	end
+end
 
+
+function load_state(m_data)
+	if not m_data then return end
+	order_table = m_data.oa_table or {}
+end
+
+
+function save_state(m_data)
+	if not m_data then return end
+	m_data.oa_table = order_table
+end
+
+--[[-------------------------------------------условия для диалогов----------------------------------]]
 
 function requirement_for_upgr(actor, npc)
 	if not npc then return end
@@ -309,6 +392,7 @@ function check_mas(mas)
 	if i ~= 0 then return true end
 	return false
 end
+
 
 function check_parts(actor, npc)
 	if check_mas(track_parts) then return true end
