@@ -27,21 +27,21 @@ function print_list(tbl)
 	end
 end
 
-function on_key_press(key) 
-	if key == DIK_keys.DIK_Z and debug == true then 
-		printf("track_parts:")
-		print_list(track_parts)
-		printf("track_upgr:")
-		print_list(track_upgr)
-		printf("order_table:")
-		print_list(order_table)
-	end 
-end
-
 local function print_dbg(msg)
 	if debug then
 		printf(string.format("- [_oa_trade_tracked.script] | ") .. msg)
 	end
+end
+
+function on_key_press(key) 
+	if key == DIK_keys.DIK_Z and debug == true then 
+		print_dbg("track_parts:")
+		print_list(track_parts)
+		print_dbg("track_upgr:")
+		print_list(track_upgr)
+		print_dbg("order_table:")
+		print_list(order_table)
+	end 
 end
 
 --[[
@@ -203,6 +203,7 @@ function length_of_list(list)
 	return i
 end
 
+
 function make_order(name, npc)
 	local t = game.get_game_time()
 	local e = game.CTime()
@@ -214,9 +215,7 @@ function make_order(name, npc)
 	
 	order_table[name].from_time = t
 	order_table[name].to_time = e -- сюда время на доставку
-	order_table[name].level = level.name()
 	order_table[name].id = npc:id()
-	
 	order_table[name].comm = dynamic_news_helper.GetCommunityDescription(npc,6)
 	order_table[name].icon = npc:character_icon()
 	order_table[name].msg_snd = false
@@ -224,7 +223,6 @@ end
 
 
 function order_ready(name)
-	local level_name = level.name()
 	local msg = game.translate_string("oa_msg_order_ready")
 	local comm = order_table[name].comm
 	local icon = order_table[name].icon
@@ -236,14 +234,8 @@ function order_ready(name)
 end
 
 
-function data_inject(name)
-	local npc = level.object_by_id(order_table[name].id)
-
-	if not(order_table) or (order_table == {}) or (type(npc.name) ~= "function") then
-		print_dbg("miss injection")
-		return 
-	end
-	
+function data_inject(npc)
+	name = npc:character_name()
 	print_dbg("start injection")
 	if order_table[name]["part"] then
 		trader_autoinject.spawn_items(npc, order_table[name]["part"], true)
@@ -251,8 +243,79 @@ function data_inject(name)
 	if order_table[name]["upgr"] then
 		trader_autoinject.spawn_items(npc, order_table[name]["upgr"], true)
 	end
-	order_table[name] = nil
 	print_dbg("end injection")
+	order_table[name] = nil
+	print_dbg("table deleted")
+end
+
+--[[----------------------------------------------time_management------------------------------------]]
+
+function on_game_start()
+	if debug then
+		RegisterScriptCallback("on_key_press", on_key_press)
+	end
+
+	RegisterScriptCallback("save_state", save_state)
+	RegisterScriptCallback("load_state", load_state)
+	RegisterScriptCallback("actor_on_update", time_management)
+	RegisterScriptCallback("trader_on_restock", trader_on_restock)
+	RegisterScriptCallback("ActorMenu_on_trade_started", ActorMenu_on_trade_started)
+end
+
+
+function ActorMenu_on_trade_started()
+	print_dbg("ActorMenu_on_trade_started")
+	local npc = get_speaker()
+	
+	if not npc then 
+		return 
+	end
+	
+	name = npc:character_name()
+	if order_table[name] and order_table[name].msg_snd == true then
+		data_inject(npc)
+	end
+end
+
+
+function trader_on_restock()
+	print_dbg("trader_on_restock")
+	local npc = get_speaker()
+	
+	if not npc then 
+		return 
+	end
+	
+	name = npc:character_name()
+	if order_table[name] and order_table[name].msg_snd == true then
+		data_inject(npc)
+	end
+end
+
+
+function time_management()	
+	if length_of_list(order_table) and length_of_list(order_table) > 0 then
+		local time_now = game.get_game_time()
+		
+		for name, _ in pairs(order_table) do
+			if order_table[name].msg_snd == false and time_now:diffSec(order_table[name].from_time) > 180 then
+				print_dbg("time for message")
+				order_ready(name)
+			end
+		end
+	end
+end
+
+
+function load_state(m_data)
+	if not m_data then return end
+	order_table = m_data.oa_table or {}
+end
+
+
+function save_state(m_data)
+	if not m_data then return end
+	m_data.oa_table = order_table
 end
 
 --[[-------------------------------------------действия для диалогов----------------------------------]]
@@ -309,46 +372,6 @@ function pay_for_order3(npc, actor)
 	
 	actor:transfer_money(price, npc)
 	news_manager.relocate_money(actor, "out", price)
-end
-
---[[----------------------------------------------time_management------------------------------------]]
-
-function on_game_start()
-	RegisterScriptCallback("save_state", save_state)
-	RegisterScriptCallback("load_state", load_state)
-	RegisterScriptCallback("actor_on_update", time_management)
-end
-
-
-function time_management()	
-	if length_of_list(order_table) and length_of_list(order_table) > 0 then
-		local level_name = level.name()
-		local time_now = game.get_game_time()
-		
-		for name, _ in pairs(order_table) do
-			if order_table[name].msg_snd == false and time_now:diffSec(order_table[name].from_time) > 180 then
-				print_dbg("time for message")
-				order_ready(name)
-			end
-			
-			if order_table[name].msg_snd == true and order_table[name].level == level_name then
-				print_dbg("injected")
-				data_inject(name)
-			end
-		end
-	end
-end
-
-
-function load_state(m_data)
-	if not m_data then return end
-	order_table = m_data.oa_table or {}
-end
-
-
-function save_state(m_data)
-	if not m_data then return end
-	m_data.oa_table = order_table
 end
 
 --[[-------------------------------------------условия для диалогов----------------------------------]]
