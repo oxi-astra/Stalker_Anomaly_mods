@@ -6,7 +6,7 @@ Makes the maximum weight carried equal to the current weight of the inventory. R
 3. Battery recycle  [link](https://www.moddb.com/mods/stalker-anomaly/addons/battery-recycle)  
 Allows you to melt a bunch of worn batteries into whole batteries.  
 Update 2: compatbility with [Powered exoskeleton 2.2](https://github.com/ahuyn/anomaly-exo). Requires [custom_functor_autoinject.script](https://github.com/themrdemonized/anomaly-demonized-scripts).  
-5. order tracked  [link(outdated)](https://www.moddb.com/mods/stalker-anomaly/addons/order-tracked)  
+5. Service station in the Zone  [link](https://www.moddb.com/mods/stalker-anomaly/addons/order-tracked)  
 Allows you to order parts and upgrade kits from technicians. Based on [TRACK COMPATIBLE ITEMS](https://www.moddb.com/mods/stalker-anomaly/addons/track-compatible-items) and requires it. It also requires [trader_autoinject.script](https://github.com/ahuyn/anomaly-dependencies).  
       Update 2:
       - No more editing of the original
