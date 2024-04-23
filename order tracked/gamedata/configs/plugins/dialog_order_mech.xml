@@ -6,8 +6,9 @@
 					<next>1</next>
                 </phrase>
         
-                <phrase id="1">
-                    <text>order_by_mech_dialogue_1_1</text>	
+                <phrase id="1"> <!-- механик молчит  --> 
+                    <text>order_by_mech_dialogue_1_1</text>
+					<action>_oa_trade_tracked.cache_order_price</action>
 					<next>2</next>
                		<next>3</next> 
 					<next>8</next>
@@ -18,42 +19,45 @@
                     <text>order_by_mech_dialogue_1_7</text>
                 </phrase>
 				
-				<phrase id="2">
+				<phrase id="2"> <!-- заказ частей --> 
                     <text>order_by_mech_dialogue_1_2</text>
+					<script_text>_oa_trade_tracked.pay_for_part_text</script_text> 
 					<precondition>_oa_trade_tracked.check_parts</precondition>
 					<precondition>_oa_trade_tracked.has_money_for_order1</precondition>
                     <next>4</next>
                 </phrase>
         
-        		<phrase id="3">
+        		<phrase id="3"> <!-- заказ китов -->
                     <text>order_by_mech_dialogue_1_3</text>
+					<script_text>_oa_trade_tracked.pay_for_upgr_text</script_text> 
 					<precondition>_oa_trade_tracked.requirement_for_upgr</precondition>
 					<precondition>_oa_trade_tracked.check_upgr</precondition>
 					<precondition>_oa_trade_tracked.has_money_for_order2</precondition>
                     <next>5</next>
                 </phrase>
 				
-				<phrase id="8">
+				<phrase id="8"> <!-- заказ частей и китов -->
                     <text>order_by_mech_dialogue_1_8</text>
+					<script_text>_oa_trade_tracked.pay_for_part_and_upgr_text</script_text> 
 					<precondition>_oa_trade_tracked.requirement_for_upgr</precondition>
 					<precondition>_oa_trade_tracked.check_parts_and_upgr</precondition>
 					<precondition>_oa_trade_tracked.has_money_for_order3</precondition>
                     <next>6</next>
                 </phrase>
 				
-				<phrase id="4">
+				<phrase id="4">	<!-- оплата частей -->
                     <text>order_by_mech_dialogue_1_4</text>
 					<action>_oa_trade_tracked.make_order_parts</action>
 					<action>_oa_trade_tracked.pay_for_order1</action>
                 </phrase>
       
-       			<phrase id="5">
+       			<phrase id="5"> <!-- оплата китов -->
                     <text>order_by_mech_dialogue_1_4</text>
 					<action>_oa_trade_tracked.make_order_upgr</action>
 					<action>_oa_trade_tracked.pay_for_order2</action>
 				</phrase>
 				
-				<phrase id="6">
+				<phrase id="6"> <!-- оплата частей и китов -->
                     <text>order_by_mech_dialogue_1_4</text>
 					<action>_oa_trade_tracked.make_order_part_and_upgr</action>
 					<action>_oa_trade_tracked.pay_for_order3</action>

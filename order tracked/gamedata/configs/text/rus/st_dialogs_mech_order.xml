@@ -10,11 +10,11 @@
     </string>
 	
 	<string id="order_by_mech_dialogue_1_2">
-        <text>Запчасти. Вот список. %c[d_orange][1000]</text>
+        <text>Запчасти. Вот список. %c[d_orange][$price_for_part руб.] %c[d_green][$time_to_part]</text>
     </string>  
 	
 	<string id="order_by_mech_dialogue_1_3">
-        <text>Наборы улучшений. Вот список. %c[d_orange][10000]</text>
+        <text>Наборы улучшений. Вот список. %c[d_orange][$price_for_upgr руб.] %c[d_green][$time_to_upgr]</text>
     </string>  
 	
 	<string id="order_by_mech_dialogue_1_4">
@@ -26,7 +26,7 @@
     </string>  
 	
 	<string id="order_by_mech_dialogue_1_8">
-        <text>Запчасти и наборы улучшений. Вот список. %c[d_orange][9000]</text>
+        <text>Запчасти и наборы улучшений. Вот список. %c[d_orange][$price_for_part_and_upgr руб.] %c[d_green][$time_to_p_and_u]</text>
     </string>  
 	
 	<string id="oa_msg_order_ready">

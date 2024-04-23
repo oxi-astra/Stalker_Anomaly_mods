@@ -11,9 +11,23 @@ local track_parts = {}
 local track_upgr = {}
 local order_table = {}
 
+local cached_order_price_part
+local cached_order_price_upgr
+local cached_order_price_part_and_upgr
+
+local to_time_part = game.CTime()
+local to_time_upgr = game.CTime()
+local to_time_part_and_upgr = game.CTime()
+
+local base_time_p = 13
+local base_time_u = 17
+
+local base_cost_p = 100
+local base_cost_u = 150
+
 --[[------------------------------------debugging------------------------------------------------------------]]
 
-local debug = true
+local debug = false
 
 function print_list(tbl)
 	for sec,count in pairs(tbl) do
@@ -27,9 +41,18 @@ function print_list(tbl)
 	end
 end
 
-local function print_dbg(msg)
+local function print_dbg(msg, num)
 	if debug then
-		printf(string.format("- [_oa_trade_tracked.script] | ") .. msg)
+		printf(string.format("- [_oa_trade_tracked.script] | ") .. msg, num)
+	end
+end
+
+local function print_time(t, msg)
+	if not t then return end
+	if debug then
+		local Y, M, D, h, m, s, ms = 0, 0, 0, 0, 0, 0, 0
+		Y, M, D, h, m, s, ms = t:get( Y, M, D, h, m, s, ms )
+		printf(string.format("- [_oa_trade_tracked.script] | ") .. msg .. "  : %s.%s.%s %s:%s:%s.%s", Y, M, D, h, m, s, ms)
 	end
 end
 
@@ -194,7 +217,7 @@ end
 
 --[[----------------------------------------------вспомогательные-------------------------------------]]
 
-function length_of_list(list)
+local function length_of_list(list)
 	if not list then return end
 	local i = 0
 	for a, b in pairs(list) do
@@ -204,17 +227,23 @@ function length_of_list(list)
 end
 
 
-function make_order(name, npc)
-	local t = game.get_game_time()
-	local e = game.CTime()
-	local Y, M, D, h, m, s, ms = 0, 0, 0, 0, 0, 0, 0
-	Y, M, D, h, m, s, ms = t:get( Y, M, D, h, m, s, ms )
-	e:set( Y, M, D, h, m + 3, s, ms )
+local function time_to_string(t)
+	if not t or type(t)~="userdata" then return end
 	
-	-- length_of_list() -- внедрение зависимости времени и денег от количества
+	local Y, M, D, h, m, s, ms = t:get( Y, M, D, h, m, s, ms )
 	
-	order_table[name].from_time = t
-	order_table[name].to_time = e -- сюда время на доставку
+	if M > 1 then
+		return string.format("%s M, %s D, %s h, %s m", M-1, D-1, h, m)
+	elseif D > 1 then 
+		return string.format("%s D, %s h, %s m", D-1, h, m)
+	else
+		return string.format("%s h, %s m", h, m)
+	end
+end
+
+
+local function make_order(name, npc)
+	order_table[name].to_time = game.CTime()
 	order_table[name].id = npc:id()
 	order_table[name].comm = dynamic_news_helper.GetCommunityDescription(npc,6)
 	order_table[name].icon = npc:character_icon()
@@ -222,7 +251,7 @@ function make_order(name, npc)
 end
 
 
-function order_ready(name)
+local function order_ready(name)
 	local msg = game.translate_string("oa_msg_order_ready")
 	local comm = order_table[name].comm
 	local icon = order_table[name].icon
@@ -234,7 +263,7 @@ function order_ready(name)
 end
 
 
-function data_inject(npc)
+local function data_inject(npc)
 	name = npc:character_name()
 	print_dbg("start injection")
 	if order_table[name]["part"] then
@@ -251,10 +280,6 @@ end
 --[[----------------------------------------------time_management------------------------------------]]
 
 function on_game_start()
-	if debug then
-		RegisterScriptCallback("on_key_press", on_key_press)
-	end
-
 	RegisterScriptCallback("save_state", save_state)
 	RegisterScriptCallback("load_state", load_state)
 	RegisterScriptCallback("actor_on_update", time_management)
@@ -296,9 +321,8 @@ end
 function time_management()	
 	if length_of_list(order_table) and length_of_list(order_table) > 0 then
 		local time_now = game.get_game_time()
-		
 		for name, _ in pairs(order_table) do
-			if order_table[name].msg_snd == false and time_now:diffSec(order_table[name].from_time) > 180 then
+			if order_table[name].msg_snd == false and time_now:diffSec(order_table[name].to_time) > 0 then
 				print_dbg("time for message")
 				order_ready(name)
 			end
@@ -348,30 +372,92 @@ function make_order_part_and_upgr(npc)
 end
 
 
-function pay_for_order1(npc, actor)
+function cache_order_price()
+	local p = length_of_list(track_parts) or 0
+	local u = length_of_list(track_upgr) or 0
 
-	local price = 1000
+	cached_order_price_part = base_cost_p*p
+	cached_order_price_upgr = base_cost_u*u
+	cached_order_price_part_and_upgr = cached_order_price_part + cached_order_price_upgr
 	
+	print_dbg("cached_order_price_part is %s ", cached_order_price_part)
+	print_dbg("cached_order_price_upgr is %s ", cached_order_price_upgr)
+	print_dbg("cached_order_price_part_and_upgr is %s ", cached_order_price_part_and_upgr)
+	
+	local pp = base_time_p*p
+	local uu = base_time_u*u
+	to_time_part:set( 1, 1, 1, 0, 0 + pp, 0, 0 )
+	to_time_upgr:set( 1, 1, 1, 0, 0 + uu, 0, 0 )
+	to_time_part_and_upgr:set( 1, 1, 1, 0, 0 + pp + uu, 0, 0 )
+	
+	print_time(to_time_part, "to_time_part")
+	print_time(to_time_upgr, "to_time_upgr")
+	print_time(to_time_part_and_upgr, "to_time_part_and_upgr")
+
+	p_time_string = time_to_string(to_time_part)
+	u_time_string = time_to_string(to_time_upgr)
+	p_and_u_time_string = time_to_string(to_time_part_and_upgr) 
+	
+	print_dbg(p_time_string)
+	print_dbg(u_time_string)
+	print_dbg(p_and_u_time_string)
+end
+
+
+function pay_for_order1(npc, actor)
+	local name = npc:character_name()
+	local tt = game.get_game_time()
+	print_time(tt, "tt")
+	
+	order_table[name].to_time = tt+to_time_part
+	print_time(order_table[name].to_time, "time_to_order1")
+	
+	local price = cached_order_price_part
 	actor:transfer_money(price, npc)
 	news_manager.relocate_money(actor, "out", price)
 end
 
 
 function pay_for_order2(npc, actor)
-
-	local price = 2000
-
+	local name = npc:character_name()
+	local tt = game.get_game_time()
+	print_time(tt, "tt")
+	
+	order_table[name].to_time = tt+to_time_upgr
+	print_time(order_table[name].to_time, "time_to_order2")
+	
+	local price = cached_order_price_upgr
 	actor:transfer_money(price, npc)
 	news_manager.relocate_money(actor, "out", price)
 end
 
 
 function pay_for_order3(npc, actor)
-
-	local price = 3000
+	local name = npc:character_name()
+	local tt = game.get_game_time()
+	print_time(tt, "tt")
 	
+	order_table[name].to_time = tt+to_time_part_and_upgr
+	print_time(order_table[name].to_time, "time_to_order3")
+	
+	local price = cached_order_price_part_and_upgr
 	actor:transfer_money(price, npc)
 	news_manager.relocate_money(actor, "out", price)
+end
+
+
+function pay_for_part_text()
+	return utils_data.parse_string_keys(game.translate_string("order_by_mech_dialogue_1_2"), { ["price_for_part"] = cached_order_price_part, ["time_to_part"] = p_time_string })
+end
+
+
+function pay_for_upgr_text()
+	return utils_data.parse_string_keys(game.translate_string("order_by_mech_dialogue_1_3"), { ["price_for_upgr"] = cached_order_price_upgr, ["time_to_upgr"] = u_time_string })
+end
+
+
+function pay_for_part_and_upgr_text()
+	return utils_data.parse_string_keys(game.translate_string("order_by_mech_dialogue_1_8"), { ["price_for_part_and_upgr"] = cached_order_price_part_and_upgr, ["time_to_p_and_u"] = p_and_u_time_string })
 end
 
 --[[-------------------------------------------условия для диалогов----------------------------------]]
@@ -393,17 +479,17 @@ end
 
 
 function has_money_for_order1(actor, npc)
-	return db.actor:money() >= 1000
+	return db.actor:money() >= cached_order_price_part
 end
 
 
 function has_money_for_order2(actor, npc)
-	return db.actor:money() >= 10000
+	return db.actor:money() >= cached_order_price_upgr
 end
 
 
 function has_money_for_order3(actor, npc)
-	return db.actor:money() >= 9000
+	return db.actor:money() >= cached_order_price_part_and_upgr
 end
 
 
