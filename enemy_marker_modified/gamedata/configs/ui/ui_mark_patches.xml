@@ -63,4 +63,8 @@
 	<army_npc x="0" y="0" width="9" height="12" alignment="c" scale="1" scale_min="1" scale_max="1" stretch="5" location_level="5">
 		<texture>ui_mm_faction_army</texture>
 	</army_npc>	
+	
+	<arena_enemy x="0" y="0" width="9" height="12" alignment="c" scale="1" scale_min="1" scale_max="1" stretch="5" location_level="5">
+		<texture>ui_mm_faction_stalker_inactive</texture>
+	</arena_enemy>	
 </w>

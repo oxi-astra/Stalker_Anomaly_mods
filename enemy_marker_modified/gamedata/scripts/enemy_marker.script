@@ -1,4 +1,4 @@
-local UF_MARKER_LOOT_RANGE	= 100 * 100
+local UF_MARKER_LOOT_RANGE	= 110 * 110
 local marker_loot_storage = {}
 
 function marker_loot_actor_on_update()
