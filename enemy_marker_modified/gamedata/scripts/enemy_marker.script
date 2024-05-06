@@ -60,6 +60,22 @@ function marker_loot_update()
 	end
 end
 
+local allowed_marker = {
+	["stalker"] = true,
+	["bandit"] = true,
+	["csky"] = true,
+	["army"] = true,
+	["freedom"] = true,
+	["dolg"] = true,
+	["ecolog"] = true,
+	["killer"] = true,
+	["monolith"] = true,
+	["greh"] = true,
+	["renegade"] = true,
+	["isg"] = true,
+	["zombied"] = true
+}
+
 class "ui_marker_enemy" (CUIScriptWnd)
 
 function ui_marker_enemy:__init() super()
@@ -86,7 +102,11 @@ function ui_marker_enemy:Update()
 		if (st and st.object and marker_loot_validate_npc(st.object)) then
 			if (self.ele[id] == nil) then
 				self.ele[id] = {}
-				self.ele[id].marker = self.xml:InitStatic(st.object:character_community(), self)
+				if allowed_marker[st.object:character_community()] then
+					self.ele[id].marker = self.xml:InitStatic(st.object:character_community(), self)
+				else
+					self.ele[id].marker = self.xml:InitStatic("marker",self)
+				end
 				self.ele[id].border = self.xml:InitStatic("marker:border",self.ele[id].marker)
 			end
 			
