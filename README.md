@@ -1,5 +1,4 @@
 # Stalker Anomaly mods by oxi-astra  
-
 1. Unlimited Ammo  [link](https://www.nexusmods.com/stalkeranomaly/mods/57)  
 Removes all ammo from the inventory and adds about 100 ammo for the current weapon.
 
@@ -20,5 +19,5 @@ Allows you to order parts and upgrade kits from technicians. Based on [TRACK COM
 7. enemy_marker_modified  
 This is [THIS](https://www.moddb.com/mods/stalker-anomaly/addons/enemy-marker-reupload) + [that one](https://www.moddb.com/mods/stalker-anomaly/addons/crooks-faction-identification-ui).
 
-8. aim-assist
+8. aim-assist  
 lua implementation aim-assist, ready to work
