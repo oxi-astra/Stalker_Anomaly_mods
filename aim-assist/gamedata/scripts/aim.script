@@ -3,7 +3,6 @@ local function print_dbg(msg, num)
 	printf(string.format("- [aim.script] | ") .. msg, num)
 end
 
-
 function dot_eye(position)
 	local toPoint = vector():set(position):sub(device().cam_pos):normalize()
 	local toEye = device().cam_dir
@@ -11,16 +10,22 @@ function dot_eye(position)
 	return dot
 end
 
+local function posy(obj)
+	local pos = vector():set(obj:position())
+	pos.y = pos.y + 1
+	return pos
+end
 
 function is_valid_object(obj)
-	if (IsStalker(obj) and (obj:relation(db.actor) >= game_object.enemy) or IsMonster(obj)) and obj:alive() and db.actor:alive() and db.actor:see(obj) then
-	--if (IsStalker(obj) or IsMonster(obj)) and obj:alive() and db.actor:alive() and db.actor:see(obj) then		-- use this for aiming on non-enemy target
+	if (IsStalker(obj) or IsMonster(obj)) and 
+	obj:alive() and db.actor:see(obj) and (obj:relation(db.actor) >= game_object.enemy) or
+	IsHelicopter(obj) and obj:alive()
+	then
 		return true
 	else 
 		return false 
 	end
 end
-
 
 local LastTarget = nil
 local bone = "bip01_neck"
@@ -30,12 +35,15 @@ local bone = "bip01_neck"
 
 
 function dot_check(obj)
-	local pos = utils_obj.safe_bone_pos(obj, bone)
+	pos = obj:get_bone_id(bone) == 65535 and posy(obj) or utils_obj.safe_bone_pos(obj, bone)
+
 	local dot = dot_eye(pos)
 	local trigger_zone = 0.995
+
 	if distance_between_safe(db.actor, obj) <= 10 then
-		trigger_zone = 0.6
+		trigger_zone = 0.8
 	end
+
 	if dot and dot >= trigger_zone then
 		return true
 	else
@@ -47,7 +55,7 @@ end
 function search_target()
 	local t = db.storage
 	for id,st in pairs(t) do
-		if st and st.object and is_valid_object(st.object) and dot_check(st.object) then
+		if st.object and is_valid_object(st.object) and dot_check(st.object) then
 			LastTarget = st.object
 			return
 		end
@@ -58,7 +66,7 @@ end
 
 function trace_target(obj)
 	if not(obj) then return end
-	local pos = utils_obj.safe_bone_pos(obj, bone)
+	pos = obj:get_bone_id(bone) == 65535 and posy(obj) or utils_obj.safe_bone_pos(obj, bone)
 	local look_dir = pos:sub(device().cam_pos):normalize()
 	local aim_target = vector():mad(device().cam_pos, look_dir, 100)
 	db.actor:actor_look_at_point(aim_target)
@@ -68,7 +76,6 @@ end
 function aim_assist()
 	local wpn = db.actor:active_item()
 	if wpn and IsWeapon(wpn) then
-
 		local obj = level.get_target_obj()
 		if obj and is_valid_object(obj) and dot_check(obj) then
 			LastTarget = obj
@@ -83,6 +90,18 @@ function aim_assist()
 end
 
 
-function on_game_start()
+function actor_on_weapon_zoom_in()
 	RegisterScriptCallback("actor_on_update", aim_assist)
+end
+
+
+function actor_on_weapon_zoom_out()
+	UnregisterScriptCallback("actor_on_update", aim_assist)
+	db.actor:actor_stop_look_at_point()
+end
+
+
+function on_game_start()
+	RegisterScriptCallback("actor_on_weapon_zoom_in", actor_on_weapon_zoom_in)
+	RegisterScriptCallback("actor_on_weapon_zoom_out", actor_on_weapon_zoom_out)
 end

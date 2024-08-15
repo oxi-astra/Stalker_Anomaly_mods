@@ -1,0 +1,79 @@
+
+local function print_dbg(msg, num)
+	printf(string.format("- [looter.script] | ") .. msg, num)
+end
+
+local delete_corps = false
+
+function IsQuestItem(item)
+	sec = item:section()
+    if not sec then return end
+    local actor = db.actor
+    if not actor then return end
+
+    local tm = task_manager.get_task_manager()
+	local task_info = tm.task_info
+
+    for task_id,v in pairs(task_info) do
+        local status = task_info[task_id].last_check_task
+        if not (status == "complete" or status == "fail") then 
+            local fetch_sec = load_var(actor, task_id.."_fetch")
+            if fetch_sec and fetch_sec == sec then
+                return true
+            end
+        end
+    end
+	return false
+end
+
+function marauder(npc)
+	local function itr(npc, item)
+		if IsWeapon(item) and IsQuestItem(item) then
+			npc:transfer_item(item, db.actor)
+			return
+		end
+		if 
+		IsWeapon(item) or 
+		IsOutfit(item) or 
+		IsHeadgear(item) 
+		then
+			return
+		end
+		npc:transfer_item(item, db.actor)
+		return
+	end
+	
+	npc:iterate_inventory(itr, npc)
+	RemoveTimeEvent("ev_id_"..npc:name(), "act_id_"..npc:name())
+	
+	local function func_delete_corps(npc)
+		local sim = alife()
+		sim:release(sim:object(npc:id()))
+		RemoveTimeEvent("corps_id_"..npc:name(), "delete_id_"..npc:name())
+	end
+	
+	if delete_corps then
+		CreateTimeEvent("corps_id_"..npc:name(), "delete_id_"..npc:name(), 1, func_delete_corps, npc)
+	end
+end
+
+function npc_on_death_callback(victim, aggressor)
+	if 
+	IsStalker(victim) and 
+	not(utils_item.has_quest_item(victim)) 
+	then
+		death_manager.create_release_item(victim)
+		CreateTimeEvent("ev_id_"..victim:name(), "act_id_"..victim:name(), 1, marauder, victim)
+	end
+end
+
+function npc_on_silent_kill_callback(victim, aggressor, weapon, was_melee)
+	npc_on_death_callback(victim, aggressor)
+end
+
+function on_game_start()
+	RegisterScriptCallback("npc_on_death_callback", npc_on_death_callback)
+	if stealth_kill_detection then
+		RegisterScriptCallback("npc_on_silent_kill_callback", npc_on_silent_kill_callback)
+	end
+end
