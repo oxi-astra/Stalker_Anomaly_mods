@@ -5,15 +5,14 @@ end
 
 local force_drop_ammo = false
 
-
 function oa_add_ammo()
-	local function itr(_,obj)
+	local function drop_ammo(_,obj)
 		if obj:is_ammo() then
 			alife_release(obj)
 		end
 	end
 	if force_drop_ammo then 
-		db.actor:iterate_inventory(itr,db.actor) 
+		db.actor:iterate_inventory(drop_ammo,db.actor) 
 	end
 	
 	local wpn = db.actor:active_item()
@@ -25,14 +24,16 @@ function oa_add_ammo()
 	local ammo = utils_item.get_ammo(wpn:section(), wpn:id(), true)
 	local string_find = string.find
 	
-	for sec,_ in pairs(ammo) do	
-		if not(string_find(sec,"_verybad") or string_find(sec,"_bad")) then
+	for sec,id in pairs(ammo) do
+		if not(string_find(sec,"_verybad") or string_find(sec,"_bad") or string_find(sec,"buck_self")) then
 			local ammo_amount = utils_item.get_amount(db.actor, sec)
 			if ammo_amount < ammo_mag_size then
+
 				alife_create_item(sec, db.actor, { ammo = ammo_mag_size })
 			end
 		end		
 	end
+
 end
 
 
