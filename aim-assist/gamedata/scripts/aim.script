@@ -1,22 +1,76 @@
 
-local bone = "bip01_neck"
--- bip01_head
--- bip01_neck
--- bip01_spine
-local unlock_bone = false 	-- experimentally: pointing at the nearest part of the body
-local closer_wider = false	-- increasing the trigger area near the target
-
-local keybind = 15	-- the switch key, default is "tab"
-local turn_on = true
 local zoom_in = false
 local LastTarget = nil
-local bone_mapper = aim_bone_mapper
+local turn_on = true
+weapon_black_list = {}
 
----------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------MCM stuff--------------------------------------------------------------------------------
+
+local get_config = aim_mcm.get_config
+
+function translate_bone(number)
+	local bone_guide = {
+		[1] = "bip01_head",
+		[2] = "bip01_neck",
+		[3] = "bip01_spine",
+	}
+	return bone_guide[number]
+end
+
+function on_option_change()
+	bone = translate_bone( get_config("main_bone") )
+	work_state = get_config("work_state")
+	keybind = get_config("ui_keybind")
+	
+	time_out_checkbox = get_config("time_out_checkbox")
+	time_out_input = get_config("time_out_input")
+	
+	limit_mode = get_config("limit_mode")
+	limit_value = get_config("limit_value")
+	
+	trigger_zone_default = get_config("radius")
+	trigger_zone = trigger_zone_default
+	
+	frendly_fire = get_config("frendly_fire")
+	
+	closer_wider = get_config("closer_wider")
+	closer_wider_value = get_config("closer_wider_value")
+	closer_wider_distance = get_config("closer_wider_distance")
+	
+	weapon_black_list = {
+		["w_pistol"] = get_config("wbl_pistols"),
+		["w_smg"] = get_config("wbl_smg"),
+		["w_rifle"] = get_config("wbl_rifle"),
+		["w_shotgun"] = get_config("wbl_shotgun"),
+		["w_sniper"] = get_config("wbl_snipe"),
+		["w_explosive"] = get_config("wbl_explosive")
+	}
+	
+	if work_state == 0 then
+		UnregisterScriptCallback("actor_on_update", aim_assist)
+		LastTarget = nil
+	end
+end
+
+local function limit_equation(obj)
+	return limit_mode == 0 or
+	(limit_mode == -1) and (distance_between_safe(db.actor, obj) <= limit_value) or 
+	(limit_mode == 1) and (distance_between_safe(db.actor, obj) >= limit_value)
+end
+
+local function IsAllowedWeapon()
+	wpn = db.actor:active_item()
+	if wpn and IsWeapon(wpn) then 
+		return weapon_black_list[ini_sys:r_string_ex(wpn:section(),"kind")] or nil
+	end
+	return false
+end
 
 local function print_dbg(msg, num)
 	printf(string.format("- [aim.script] | ") .. msg, num)
 end
+
+---------------------------------------------main------------------------------------------------------------------------------------
 
 function dot_eye(position)
 	local toPoint = vector():set(position):sub(device().cam_pos):normalize()
@@ -26,6 +80,7 @@ function dot_eye(position)
 end
 
 local function pos_y(obj)
+	if not(obj) then return end
 	local pos = vector():set(obj:position())
 	pos.y = pos.y + 1
 	return pos
@@ -33,7 +88,11 @@ end
 
 function is_valid_object(obj)
 	if not(obj) then return end
-	if (IsStalker(obj) and (obj:relation(db.actor) >= game_object.enemy) or IsMonster(obj)) and 
+	if not limit_equation(obj) then return end
+	
+	if ( (frendly_fire and IsStalker(obj)) or 
+	(IsStalker(obj) and (obj:relation(db.actor) >= game_object.enemy)) or 
+	IsMonster(obj) ) and 
 	obj:alive() and db.actor:see(obj) or
 	IsHelicopter(obj) and obj:alive()
 	then
@@ -45,58 +104,44 @@ end
 
 function dot_check(obj)
 	if not(obj) then return end
-
+	
 	local pos = obj:get_bone_id(bone) == 65535 and pos_y(obj) or utils_obj.safe_bone_pos(obj, bone)
-
 	local dot = dot_eye(pos)
-	local trigger_zone = 0.995
 
-	if closer_wider and distance_between_safe(db.actor, obj) <= 8 then
-		trigger_zone = 0.7
+	if closer_wider and distance_between_safe(db.actor, obj) <= closer_wider_distance then
+		trigger_zone = closer_wider_value
+	else
+		trigger_zone = trigger_zone_default
 	end
 
 	if dot and dot >= trigger_zone then
-		return true
+		return dot
 	else
-		return
+		return nil
 	end
 end
 
 function search_target()
-	local t = db.storage
-	for id,st in pairs(t) do
-		if st.object and is_valid_object(st.object) and dot_check(st.object) then
-			LastTarget = st.object
-			return
-		end
-	end
-	LastTarget = nil
-	return
-end
+    local t = db.storage
+    local best_dot = -1
+    local best_target = nil
 
-function nearest_bone(obj)
-	local max_dot = dot_eye( obj:bone_position(bone) )
-	local max_name = bone
-	
-	local cls = obj.clsid and obj:clsid()
-	local creature_c = bone_mapper.creatures_cls[cls]
-	for bone_num, bone_name in pairs(creature_c) do
-		current_dot = dot_eye( obj:bone_position(bone_name[1]) )
-		if current_dot > max_dot then
-			max_dot = current_dot
-			max_name = bone_name[1]
-		end
-	end
-	return max_name
+    for id, st in pairs(t) do
+        if st.object and is_valid_object(st.object) then
+            local dot = dot_check(st.object)
+            if dot and dot > best_dot then
+                best_dot = dot
+                best_target = st.object
+            end
+        end
+    end
+
+    LastTarget = best_target
 end
 
 function trace_target(obj)
-	local pos = nil
-	if unlock_bone then
-		pos = obj:get_bone_id(bone) == 65535 and pos_y(obj) or obj:bone_position(nearest_bone(obj))
-	else
-		pos = obj:get_bone_id(bone) == 65535 and pos_y(obj) or utils_obj.safe_bone_pos(obj, bone)
-	end
+	if not(obj) then return end
+	local pos = obj:get_bone_id(bone) == 65535 and pos_y(obj) or utils_obj.safe_bone_pos(obj, bone)
 	db.actor:actor_look_at_point(pos)
 end
 
@@ -113,33 +158,82 @@ function aim_assist()
 			db.actor:actor_stop_look_at_point()
 			search_target()
 		end
+	else
+		return
 	end
 end
 
+-----------------------------------------------------------work states----------------------------------------------------------------------------------------------------
 
 function actor_on_weapon_zoom_in()
-	if turn_on then
-		RegisterScriptCallback("actor_on_update", aim_assist)
-	end
+	turn_on = true
 	zoom_in = true
+	if work_state == 1 and IsAllowedWeapon() then
+		RegisterScriptCallback("actor_on_update", aim_assist)
+		if time_out_checkbox then
+			CreateTimeEvent("time_out_ev", "time_out_act", time_out_input, function()
+				UnregisterScriptCallback("actor_on_update", aim_assist)
+				db.actor:actor_stop_look_at_point()
+				LastTarget = nil
+				RemoveTimeEvent("time_out_ev", "time_out_act")
+			end)
+		end
+	end
 end
 
 function actor_on_weapon_zoom_out()
-	UnregisterScriptCallback("actor_on_update", aim_assist)
-	db.actor:actor_stop_look_at_point()
-	LastTarget = nil
 	zoom_in = false
+	turn_on = true
+	if (work_state == 1) then
+		UnregisterScriptCallback("actor_on_update", aim_assist)
+		db.actor:actor_stop_look_at_point()
+		LastTarget = nil
+	end
+end
+
+function on_key_hold(key)
+	if (work_state == 2) and (key == keybind) and IsAllowedWeapon() then
+		RegisterScriptCallback("actor_on_update", aim_assist)
+	end
+end
+
+function on_key_release(key)
+	if (work_state == 2) and (key == keybind) then
+		UnregisterScriptCallback("actor_on_update", aim_assist)
+		db.actor:actor_stop_look_at_point()
+		LastTarget = nil
+	end
+end
+
+function open_fire(key)
+	if (work_state ~= 3) then return end
+	
+    local wpn = db.actor:active_item()
+    if not wpn then return end
+
+	local bind = dik_to_bind(key)
+    if (bind == key_bindings.kWPN_FIRE) and IsAllowedWeapon() then
+        RegisterScriptCallback("actor_on_update", aim_assist)
+	end
+end
+
+function hold_fire(key)
+	if (work_state ~= 3) then return end
+	
+	local wpn = db.actor:active_item()
+    if not wpn then return end
+
+	local bind = dik_to_bind(key)
+    if (bind == key_bindings.kWPN_FIRE) then
+		UnregisterScriptCallback("actor_on_update", aim_assist)
+		db.actor:actor_stop_look_at_point()
+		LastTarget = nil
+	end
 end
 
 function on_key_press(key)
-	if (key == keybind) then
+	if (key == keybind) and (work_state == 1) then
 		turn_on = not(turn_on)
-		
-		if turn_on then
-			print_dbg("aim-assist turn_on")
-		else
-			print_dbg("aim-assist turn_off")
-		end
 		
 		if zoom_in and turn_on then
 			RegisterScriptCallback("actor_on_update", aim_assist)
@@ -151,25 +245,7 @@ function on_key_press(key)
 	end
 end
 
-function npc_on_net_destroy(npc)
-	if LastTarget and LastTarget:id() == npc:id() then
-		LastTarget = nil
-	end
-end
-
-function monster_on_net_destroy(npc)
-	if LastTarget and LastTarget:id() == npc:id() then
-		LastTarget = nil
-	end
-end
-
-function npc_on_death_callback(npc)
-	if LastTarget and LastTarget:id() == npc:id() then
-		LastTarget = nil
-	end
-end
-
-function monster_on_death_callback(npc)
+function delete_LastTarger(npc)
 	if LastTarget and LastTarget:id() == npc:id() then
 		LastTarget = nil
 	end
@@ -178,9 +254,16 @@ end
 function on_game_start()
 	RegisterScriptCallback("actor_on_weapon_zoom_in", actor_on_weapon_zoom_in)
 	RegisterScriptCallback("actor_on_weapon_zoom_out", actor_on_weapon_zoom_out)
+	RegisterScriptCallback("actor_on_weapon_lower", actor_on_weapon_zoom_out)
+	RegisterScriptCallback("on_key_hold", on_key_hold)
+	RegisterScriptCallback("on_key_release", on_key_release)
+	RegisterScriptCallback("on_key_hold", open_fire)
+	RegisterScriptCallback("on_key_release", hold_fire)
 	RegisterScriptCallback("on_key_press",on_key_press)
-	RegisterScriptCallback("npc_on_net_destroy", npc_on_net_destroy)
-	RegisterScriptCallback("monster_on_net_destroy", monster_on_net_destroy)
-	RegisterScriptCallback("npc_on_death_callback", npc_on_death_callback)
-	RegisterScriptCallback("monster_on_death_callback", monster_on_death_callback)
+	RegisterScriptCallback("npc_on_net_destroy", delete_LastTarger)
+	RegisterScriptCallback("monster_on_net_destroy", delete_LastTarger)
+	RegisterScriptCallback("npc_on_death_callback", delete_LastTarger)
+	RegisterScriptCallback("monster_on_death_callback", delete_LastTarger)
+	RegisterScriptCallback("on_option_change", on_option_change)
+	on_option_change()
 end

@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="windows-1251"?>
+
+<!-- 
+	Anomaly Modconfiguration Menu
+-->
+
+<string_table>
+
+	<string id="ui_mcm_menu_aim_assist">
+		<text>Aim-assist</text>
+	</string>
+
+	<string id="aim_assist_title">
+		<text>Aim-assist Настройки</text>
+	</string>	
+
+	<string id="ui_mcm_aim_assist_main_bone">
+		<text>Центр притяжения</text>
+	</string>
+	
+	<string id="ui_mcm_aim_assist_main_bone_desc">
+		<text>Часть тела, на которую наводит аим-ассист</text>
+	</string>
+	
+	<string id="ui_mcm_lst_bone_head">
+		<text>Голова</text>
+	</string>
+	
+	<string id="ui_mcm_lst_bone_neck">
+		<text>Шея</text>
+	</string>
+	
+	<string id="ui_mcm_lst_bone_spine">
+		<text>Спина (чуть выше таза)</text>
+	</string>
+	
+	<!-->Переключатель<-->
+	
+	<string id="ui_mcm_aim_assist_work_state">
+		<text>Рабочий режим</text>
+	</string>
+	
+	<string id="ui_mcm_aim_assist_work_state_desc">
+		<text>- При прицеливании - срабатывает при прицеливании оружием. Можно включить/выключить нажатием клавиши активации\n- По удержанию кнопки - ассист работает
+		только при зажатой кнопке активации\n- При нажатии на спусковой крючёк - активируется и работает при нажатии кнопки атаки</text>
+	</string>
+	
+	<string id="ui_mcm_lst_zoom_mode">
+		<text>При прицеливании</text>
+	</string>
+	
+	<string id="ui_mcm_lst_push_mode">
+		<text>По удержанию кнопки</text>
+	</string>
+	
+	<string id="ui_mcm_lst_fire_mode">
+		<text>При нажатии на спусковой крючёк</text>
+	</string>
+	
+	<string id="ui_mcm_lst_turn_off">
+		<text>Выключить</text>
+	</string>	
+	
+	<string id="ui_mcm_aim_assist_ui_keybind">
+		<text>Клавиша активации</text>
+	</string>	
+	
+	<string id="ui_mcm_aim_assist_ui_keybind_desc">
+		<text>Используется для режимов "При прицеливании" и "По удержанию кнопки"</text>
+	</string>
+	
+	<!--><-->
+
+	<string id="ui_mcm_aim_assist_time_out_checkbox">
+		<text>Таймер остановки</text>
+	</string>
+	
+	<string id="ui_mcm_aim_assist_time_out_checkbox_desc">
+		<text>По истечению времени ассист отключается. Работает только для режима "При прицеливании". Ассист может быть включён обратно клавишей активации</text>
+	</string>
+
+	<string id="ui_mcm_aim_assist_time_out_input">
+		<text>Время (сек)</text>
+	</string>	
+	
+	<!--><-->
+	
+	<string id="ui_mcm_aim_assist_limit_mode">
+		<text>Исключить наведение, если цель находится</text>
+	</string>	
+	
+	<string id="ui_mcm_aim_assist_limit_value">
+		<text>Расстояние</text>
+	</string>
+	
+	<string id="ui_mcm_lst_less">
+		<text>дальше</text>
+	</string>
+	
+	<string id="ui_mcm_lst_non">
+		<text>без ограничений</text>
+	</string>	
+	
+	<string id="ui_mcm_lst_more">
+		<text>ближе</text>
+	</string>
+	
+	<!--><-->
+
+	<string id="ui_mcm_aim_assist_radius">
+		<text>Область наведения</text>
+	</string>	
+	
+	<string id="ui_mcm_aim_assist_radius_desc">
+		<text>Чем ближе значение к 1, тем меньшее расстояние между прицелом и объектом на экране нужно для срабатывания ассиста. Рекомендуемые значения варьируются от 0,99 до 0,999</text>
+	</string>
+
+	<string id="ui_mcm_aim_assist_frendly_fire">
+		<text>Наводить на дружественные цели</text>
+	</string>	
+	
+	<!--><-->
+	
+	<string id="ui_mcm_aim_assist_closer_wider">
+		<text>Увеличивать область наведения для близких целей</text>
+	</string>	
+	
+	<string id="ui_mcm_aim_assist_closer_wider_desc">
+		<text>Этот параметр увеличивает область наведения, если цель находится ближе заданного расстояния</text>
+	</string>
+
+	<string id="ui_mcm_aim_assist_closer_wider_value">
+		<text>Новая область наведения</text>
+	</string>
+
+	<string id="ui_mcm_aim_assist_closer_wider_value_desc">
+		<text>Это значение перезапишет область наведения</text>
+	</string>
+
+	<string id="ui_mcm_aim_assist_closer_wider_distance">
+		<text>Расстояние</text>
+	</string>
+	
+	<!--><-->
+
+	<string id="ui_mcm_aim_assist_wbl_pistols">
+		<text>Пистолет</text>
+	</string>
+	
+	<string id="ui_mcm_aim_assist_wbl_smg">
+		<text>Пистолет-пулемёт</text>
+	</string>
+	
+	<string id="ui_mcm_aim_assist_wbl_rifle">
+		<text>Винтовка</text>
+	</string>
+	
+	<string id="ui_mcm_aim_assist_wbl_shotgun">
+		<text>Дробовик</text>
+	</string>
+	
+	<string id="ui_mcm_aim_assist_wbl_snipe">
+		<text>Снайперское оружие</text>
+	</string>
+	
+	<string id="ui_mcm_aim_assist_wbl_explosive">
+		<text>Взрывное оружие</text>
+	</string>
+
+	<string id="ui_mcm_aim_assist_weapon_type_rule">
+		<text>Используя эти опции, вы можете отключить ассист для определенного типа оружия. По умолчанию ассист работает для всех типов оружия</text>
+	</string>	
+	
+	
+	
+</string_table>

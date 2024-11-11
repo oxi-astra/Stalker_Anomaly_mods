@@ -1,0 +1,82 @@
+
+local defaults = {
+	["main_bone"] = 2,
+	["work_state"] = 1,
+	["ui_keybind"] = 15,
+	["time_out_checkbox"] = false,
+	["time_out_input"] = 0.5,
+	["limit_mode"] = 0,
+	["limit_value"] = 10,
+	["radius"] = 0.995,
+	["closer_wider"] = false,
+	["closer_wider_value"] = 0.7,
+	["closer_wider_distance"] = 0,
+	["frendly_fire"] = false,
+	["wbl_pistols"] = true,
+	["wbl_smg"] = true,
+	["wbl_rifle"] = true,
+	["wbl_shotgun"] = true,
+	["wbl_snipe"] = true,
+	["wbl_explosive"] = true,
+}	
+
+function get_config(key)
+	return ui_mcm.get("aim_assist/"..key) or defaults[key]
+end
+
+-- ui_mcm_aim_assist_
+
+function on_mcm_load()
+    options = { id= "aim_assist", sh=true, gr={
+            {id = "title",							type= "slide",		link= "ui_options_slider_player",	text="aim_assist_title",	size= {512,50},	spacing = 20 },	
+			{id = "work_state", 					type = "list", 		val = 2,
+				content={ 
+					{1, "zoom_mode"}, 
+					{2, "push_mode"},
+					{3, "fire_mode"},
+					{0, "turn_off"},
+					}, def = 1 },
+			{id = "ui_keybind", 					type = "key_bind",	val = 2, def = 15 },
+			{id = "main_bone", 						type = "list", 		val = 2,
+				content={ 
+					{1, "bone_head"}, 
+					{2, "bone_neck"}, 
+					{3, "bone_spine"},
+					}, def = 2 },
+			{id = "radius",							type = "input",	val = 2,	min = 0,	max = 1,	def = 0.995},
+			{id = "frendly_fire",					type = "check",	val = 1,	def = false,	},
+			
+			{id = "line",							type = "line" },
+			
+			{id = "time_out_checkbox",				type = "check",	val = 1,	def = false },
+			{id = "time_out_input", 				type = "input",	val = 2,	min = 0,	max = 100,	def = 0.5 },
+			
+			{id = "line",							type = "line" },
+				
+			{id = "closer_wider",					type = "check",	val = 1,	def = false },
+			{id = "closer_wider_value", 			type = "input",	val = 2,	min = 0,	max = 1,	def = 0.7 },
+			{id = "closer_wider_distance", 			type = "input",	val = 2,	min = 0,	max = 1000,	def = 0 },			
+			
+			{id = "line",							type = "line" },	
+			
+			{id = "limit_mode", 					type = "list", val = 2,
+				content={
+					{-1, "less"},
+					{0, "non"},
+					{1, "more"},
+					}, def=0 },
+			{id = "limit_value", 					type = "input",	val = 2,	min = 0,	max = 1000,	def = 10, },
+			
+			{id = "line",							type = "line" },
+			
+			{id = "weapon_type_rule",				type = "desc",	text="ui_mcm_aim_assist_weapon_type_rule"},
+			{id = "wbl_pistols",					type = "check",	val = 1,	def = true },
+			{id = "wbl_smg",						type = "check",	val = 1,	def = true },
+			{id = "wbl_rifle",						type = "check",	val = 1,	def = true },
+			{id = "wbl_shotgun",					type = "check",	val = 1,	def = true },
+			{id = "wbl_snipe",						type = "check",	val = 1,	def = true },
+			{id = "wbl_explosive",					type = "check",	val = 1,	def = true },
+	  }
+    }
+    return options
+end

@@ -1,0 +1,174 @@
+<!-- 
+	Anomaly Modconfiguration Menu strings
+	
+-->
+
+<string_table>
+
+	<string id="ui_mcm_menu_aim_assist">
+		<text>Aim-assist</text>
+	</string>
+
+	<string id="aim_assist_title">
+		<text>Aim-assist Settings</text>
+	</string>	
+
+	<string id="ui_mcm_aim_assist_main_bone">
+		<text>Center of attraction</text>
+	</string>
+	
+	<string id="ui_mcm_aim_assist_main_bone_desc">
+		<text>the part of the body that the aim-assist is aimed at</text>
+	</string>
+	
+	<string id="ui_mcm_lst_bone_head">
+		<text>Head</text>
+	</string>
+	
+	<string id="ui_mcm_lst_bone_neck">
+		<text>Neck</text>
+	</string>
+	
+	<string id="ui_mcm_lst_bone_spine">
+		<text>Spine (just above the pelvis)</text>
+	</string>
+	
+	<!-->Переключатель<-->
+	
+	<string id="ui_mcm_aim_assist_work_state">
+		<text>Work state</text>
+	</string>
+	
+	<string id="ui_mcm_aim_assist_work_state_desc">
+		<text>- Zoom in - it is triggered when aiming. You can use the activation key to enable/disable the assist\n- Holding the button - aim-assist works while the activation key is pressed\n- Pull the trigger - triggered while the attack button is pressed</text>
+	</string>
+	
+	<string id="ui_mcm_lst_zoom_mode">
+		<text>Zoom in</text>
+	</string>
+	
+	<string id="ui_mcm_lst_push_mode">
+		<text>Holding the button</text>
+	</string>
+	
+	<string id="ui_mcm_lst_fire_mode">
+		<text>Pull the trigger</text>
+	</string>
+	
+	<string id="ui_mcm_lst_turn_off">
+		<text>Turn off</text>
+	</string>	
+	
+	<string id="ui_mcm_aim_assist_ui_keybind">
+		<text>Activation key</text>
+	</string>	
+	
+	<string id="ui_mcm_aim_assist_ui_keybind_desc">
+		<text>It is used for "Zoom in" and "Holding the button" states</text>
+	</string>
+	
+	<!--><-->
+
+	<string id="ui_mcm_aim_assist_time_out_checkbox">
+		<text>Lock-on time out</text>
+	</string>
+	
+	<string id="ui_mcm_aim_assist_time_out_checkbox_desc">
+		<text>After the time has elapsed, the assist stops working. Works only for "Zoom in" state. The assist can be turned back on by the activation key</text>
+	</string>
+
+	<string id="ui_mcm_aim_assist_time_out_input">
+		<text>Timer (sec)</text>
+	</string>	
+	
+	<!--><-->
+	
+	<string id="ui_mcm_aim_assist_limit_mode">
+		<text>Exclude guidance if the target is</text>
+	</string>	
+	
+	<string id="ui_mcm_aim_assist_limit_value">
+		<text>Distance</text>
+	</string>
+	
+	<string id="ui_mcm_lst_less">
+		<text>farther</text>
+	</string>
+	
+	<string id="ui_mcm_lst_non">
+		<text>without limitation</text>
+	</string>	
+	
+	<string id="ui_mcm_lst_more">
+		<text>closer</text>
+	</string>
+	
+	<!--><-->
+
+	<string id="ui_mcm_aim_assist_radius">
+		<text>The hover area</text>
+	</string>	
+	
+	<string id="ui_mcm_aim_assist_radius_desc">
+		<text>It is measured from 0 to 1. The closer the value is to 1, the smaller the distance from the sight to the object on the screen for the assist to be triggered. Recommended values range from 0.99 to 0.999</text>
+	</string>
+
+	<string id="ui_mcm_aim_assist_frendly_fire">
+		<text>Capturing friendly targets</text>
+	</string>	
+	
+	<!--><-->
+	
+	<string id="ui_mcm_aim_assist_closer_wider">
+		<text>Increased area for close-range targets</text>
+	</string>	
+	
+	<string id="ui_mcm_aim_assist_closer_wider_desc">
+		<text>This option increases the hover area if the target is closer to the set distance</text>
+	</string>
+
+	<string id="ui_mcm_aim_assist_closer_wider_value">
+		<text>New hover area</text>
+	</string>
+
+	<string id="ui_mcm_aim_assist_closer_wider_value_desc">
+		<text>this value overwrites the hover area</text>
+	</string>
+
+	<string id="ui_mcm_aim_assist_closer_wider_distance">
+		<text>Distance</text>
+	</string>
+	
+	<!--><-->
+
+	<string id="ui_mcm_aim_assist_wbl_pistols">
+		<text>Pistol</text>
+	</string>
+	
+	<string id="ui_mcm_aim_assist_wbl_smg">
+		<text>SMG</text>
+	</string>
+	
+	<string id="ui_mcm_aim_assist_wbl_rifle">
+		<text>Rifle</text>
+	</string>
+	
+	<string id="ui_mcm_aim_assist_wbl_shotgun">
+		<text>Shotgun</text>
+	</string>
+	
+	<string id="ui_mcm_aim_assist_wbl_snipe">
+		<text>Sniper</text>
+	</string>
+	
+	<string id="ui_mcm_aim_assist_wbl_explosive">
+		<text>Explosive</text>
+	</string>
+
+	<string id="ui_mcm_aim_assist_weapon_type_rule">
+		<text>Using these options, you can disable the assist for a specific type of weapon. By default, the assist works for all types of weapons</text>
+	</string>	
+	
+	
+	
+</string_table>
