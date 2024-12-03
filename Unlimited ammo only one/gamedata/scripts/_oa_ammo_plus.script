@@ -1,0 +1,51 @@
+
+local string_find = string.find
+local string_gsub = string.gsub
+
+function get_ammo_sec(cobj)
+	if not cobj then return end
+	local ammo_type = cobj:GetAmmoType()
+	local ammo_sec = (function()
+		local s
+
+		cobj:AmmoTypeForEach(function(i, sec)
+			if not s then
+				if ammo_type == i then
+					printf("found type %s, sec %s", i, sec)
+					s = sec
+				end
+			end
+		end)
+
+		return s
+	end)()
+	return ammo_sec
+end
+
+function oa_add_ammo()
+	local wpn = db.actor:active_item()
+	if not IsWeapon(wpn) then return end
+	
+	local ammo_mag_size = ini_sys:r_u32(wpn:section(), "ammo_mag_size")
+
+	local cobj = wpn:cast_Weapon()
+	local sec = get_ammo_sec(cobj)
+	if not sec then return end
+	
+	if (string_find(sec,"_verybad") or string_find(sec,"_bad")) then
+		sec = string_gsub(sec, "_verybad", "")
+		sec = string_gsub(sec, "_bad", "")
+	end
+		
+	local ammo_amount = utils_item.get_amount(db.actor, sec)
+	
+	if ammo_amount < ammo_mag_size then
+		alife_create_item(sec, db.actor, { ammo = ammo_mag_size })
+	end
+end
+
+function on_game_start()
+	RegisterScriptCallback("actor_on_weapon_reload", oa_add_ammo)
+	RegisterScriptCallback("actor_on_weapon_jammed", oa_add_ammo)
+	RegisterScriptCallback("actor_on_weapon_no_ammo", oa_add_ammo)
+end
